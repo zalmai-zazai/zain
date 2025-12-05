@@ -11,7 +11,7 @@ export default function AboutHero() {
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image
-            src="/zain.png"
+            src="/Zain.png"
             alt="Zain Restaurant Background"
             fill
             className="object-cover object-center"

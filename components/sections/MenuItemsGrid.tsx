@@ -7,26 +7,24 @@ import { useState } from "react";
 const menuItems = [
   {
     id: 1,
-    name: "Chicken Biryani",
+    name: "Lamb & Beefplatter",
     description:
       "Fragrant basmati rice with tender chicken pieces, infused with saffron and aromatic spices",
     price: 16.99,
     category: "biryani",
-    image:
-      "https://images.unsplash.com/photo-1563379091339-03246963d9d6?w=400&h=300&fit=crop&crop=center",
+    image: "/Lambandbeef.png",
     popular: true,
     spicy: 2,
     rating: 4.8,
   },
   {
     id: 2,
-    name: "Vegetable Samosa",
+    name: "Tilapia",
     description:
       "Crispy pastry filled with spiced potatoes and peas, served with mint chutney",
-    price: 6.99,
+    price: 16.99,
     category: "appetizers",
-    image:
-      "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&h=300&fit=crop&crop=center",
+    image: "tilapia.png",
     popular: true,
     spicy: 1,
     rating: 4.6,
@@ -57,12 +55,11 @@ const menuItems = [
   },
   {
     id: 5,
-    name: "Mango Lassi",
+    name: "Salmon vs Spaghatti",
     description: "Refreshing yogurt drink with sweet mango pulp",
-    price: 4.99,
+    price: 18.99,
     category: "drinks",
-    image:
-      "https://images.unsplash.com/photo-1628992682633-bf2d40cb595f?w=400&h=300&fit=crop&crop=center",
+    image: "salmon.png",
     popular: true,
     spicy: 0,
     rating: 4.5,

@@ -11,8 +11,7 @@ export default function CartSummaryBar() {
   const cartItems = 3;
   const cartTotal = 42.97;
 
-  if (cartItems === 0) return null;
-
+  if (cartItems <= 0) return null;
   return (
     <>
       {/* Fixed Cart Bar */}

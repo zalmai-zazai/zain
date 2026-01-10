@@ -2,8 +2,9 @@
 
 import { Plus, Star, Flame } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
 
+import { useCartStore } from "@/lib/stores/useCartStore";
+import { useEffect, useState } from "react";
 const menuItems = [
   {
     id: 1,
@@ -79,33 +80,60 @@ const menuItems = [
 ];
 
 export default function MenuItemsGrid() {
-  const [quantities, setQuantities] = useState<Record<number, number>>({});
+  // Replace local state with Zustand
+  const [mounted, setMounted] = useState(false);
+  const {
+    addItem,
+    removeItem,
+    updateQuantity,
+    items,
+    getTotalItems,
+    getTotalPrice,
+  } = useCartStore();
 
-  const addToCart = (itemId: number) => {
-    setQuantities((prev) => ({
-      ...prev,
-      [itemId]: (prev[itemId] || 0) + 1,
-    }));
+  // Helper to get quantity from Zustand
+  const getItemQuantity = (itemId: number) => {
+    const cartItem = items.find((item) => item.id === itemId);
+    return cartItem ? cartItem.quantity : 0;
   };
 
-  const removeFromCart = (itemId: number) => {
-    setQuantities((prev) => {
-      const current = prev[itemId] || 0;
-      if (current <= 1) {
-        const newQuantities = { ...prev };
-        delete newQuantities[itemId];
-        return newQuantities;
-      }
-      return {
-        ...prev,
-        [itemId]: current - 1,
-      };
+  // Updated add function
+  const addToCart = (item: any) => {
+    addItem({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      price: item.price,
+      image: item.image,
+      category: item.category,
     });
   };
 
+  // Updated remove function
+  const removeFromCart = (itemId: number) => {
+    const currentQuantity = getItemQuantity(itemId);
+    if (currentQuantity <= 1) {
+      removeItem(itemId);
+    } else {
+      updateQuantity(itemId, currentQuantity - 1);
+    }
+  };
+
+  // Function to increase quantity
+  const increaseQuantity = (item: any) => {
+    const currentQuantity = getItemQuantity(item.id);
+    updateQuantity(item.id, currentQuantity + 1);
+  };
+
+  // Calculate totals from Zustand (for mobile summary)
+  const totalItems = getTotalItems();
+  const totalPrice = getTotalPrice();
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Page Header */}
+      {/* Page Header - UNCHANGED */}
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Our Menu</h2>
         <p className="text-gray-600">
@@ -113,7 +141,7 @@ export default function MenuItemsGrid() {
         </p>
       </div>
 
-      {/* Menu Grid */}
+      {/* Menu Grid - UNCHANGED except button handlers */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {menuItems.map((item, index) => (
           <motion.div
@@ -124,13 +152,13 @@ export default function MenuItemsGrid() {
             whileHover={{ y: -5 }}
             className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden group"
           >
-            {/* Item Image */}
+            {/* Item Image - UNCHANGED */}
             <div className="relative h-48 overflow-hidden">
               <div
                 className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
                 style={{ backgroundImage: `url(${item.image})` }}
               />
-              {/* Badges */}
+              {/* Badges - UNCHANGED */}
               <div className="absolute top-3 left-3 flex space-x-2">
                 {item.popular && (
                   <span className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center">
@@ -154,7 +182,7 @@ export default function MenuItemsGrid() {
               </div>
             </div>
 
-            {/* Item Details */}
+            {/* Item Details - UNCHANGED except button handlers */}
             <div className="p-5">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-xl font-bold text-gray-900">{item.name}</h3>
@@ -165,9 +193,9 @@ export default function MenuItemsGrid() {
 
               <p className="text-gray-600 text-sm mb-4">{item.description}</p>
 
-              {/* Quantity Controls */}
+              {/* Quantity Controls - UPDATED to use Zustand */}
               <div className="flex items-center justify-between">
-                {quantities[item.id] ? (
+                {getItemQuantity(item.id) > 0 ? (
                   <div className="flex items-center space-x-3">
                     <button
                       onClick={() => removeFromCart(item.id)}
@@ -176,10 +204,10 @@ export default function MenuItemsGrid() {
                       <span className="text-gray-600 font-bold">−</span>
                     </button>
                     <span className="font-bold text-lg">
-                      {quantities[item.id]}
+                      {getItemQuantity(item.id)}
                     </span>
                     <button
-                      onClick={() => addToCart(item.id)}
+                      onClick={() => increaseQuantity(item)}
                       className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center hover:bg-amber-600 transition-colors"
                     >
                       <span className="font-bold">+</span>
@@ -187,7 +215,7 @@ export default function MenuItemsGrid() {
                   </div>
                 ) : (
                   <button
-                    onClick={() => addToCart(item.id)}
+                    onClick={() => addToCart(item)}
                     className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:shadow-lg transition-all"
                   >
                     <Plus size={18} />
@@ -195,7 +223,7 @@ export default function MenuItemsGrid() {
                   </button>
                 )}
 
-                {/* Spicy Indicator */}
+                {/* Spicy Indicator - UNCHANGED */}
                 {item.spicy > 0 && (
                   <div className="flex">
                     {[...Array(3)].map((_, i) => (
@@ -217,8 +245,8 @@ export default function MenuItemsGrid() {
         ))}
       </div>
 
-      {/* Cart Summary (Fixed at bottom on mobile) */}
-      {Object.keys(quantities).length > 0 && (
+      {/* Cart Summary (Fixed at bottom on mobile) - UPDATED to use Zustand */}
+      {mounted && totalItems > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -228,19 +256,16 @@ export default function MenuItemsGrid() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="font-bold text-gray-900">
-                  {Object.values(quantities).reduce((a, b) => a + b, 0)} items
+                  {totalItems} items
                 </div>
                 <div className="text-sm text-gray-600">
-                  $
-                  {Object.entries(quantities)
-                    .reduce((total, [id, qty]) => {
-                      const item = menuItems.find((m) => m.id === parseInt(id));
-                      return total + (item ? item.price * qty : 0);
-                    }, 0)
-                    .toFixed(2)}
+                  ${totalPrice.toFixed(2)}
                 </div>
               </div>
-              <button className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-full">
+              <button
+                onClick={() => (window.location.href = "/cart")}
+                className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-full"
+              >
                 View Cart
               </button>
             </div>

@@ -1,9 +1,21 @@
+"use client";
 import { ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
 import Navigation from "./Navigation";
 import MobileMenu from "./MobileMenu";
+import { useCartStore } from "@/lib/stores/useCartStore";
+import { useEffect, useState } from "react"; // Added this import
 
 export default function Header() {
+  const { getTotalItems } = useCartStore();
+  const [mounted, setMounted] = useState(false); // Added this line
+
+  useEffect(() => {
+    setMounted(true); // Added this line
+  }, []);
+
+  const itemCount = getTotalItems(); // Added this line
+
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm border-b">
       <div className="container mx-auto px-4 py-3">
@@ -38,15 +50,21 @@ export default function Header() {
             </button>
 
             {/* Cart */}
-            <button className="relative p-2 rounded-full hover:bg-amber-50 transition-colors group">
+            <Link
+              href="/cart"
+              className="relative p-2 rounded-full hover:bg-amber-50 transition-colors group"
+            >
               <ShoppingCart
                 size={22}
                 className="text-amber-600 group-hover:scale-110 transition-transform"
               />
-              <span className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                0
-              </span>
-            </button>
+              {mounted &&
+                itemCount > 0 && ( // Changed this line
+                  <span className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    {itemCount}
+                  </span>
+                )}
+            </Link>
 
             {/* Mobile Menu */}
             <MobileMenu />
